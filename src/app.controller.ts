@@ -1,12 +1,27 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Req, Body } from '@nestjs/common';
 import { AppService } from './app.service';
+import { Request } from 'express';
 
+const API_KEY = '*****';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post('/users')
+  async createUser(@Body() body, @Req() request: Request): Promise<string> {
+    this.checkApiKey(request);
+    return await this.appService.createUser(body);
+  }
+
+  @Get('/users')
+  async getUsers(@Req() request: Request): Promise<string> {
+    this.checkApiKey(request);
+    return await this.appService.getUsers();
+  }
+
+  private checkApiKey(request: Request): void {
+    if ((request.headers['x-api-key'] as string) !== API_KEY) {
+      throw new Error('API KEY ERROR');
+    }
   }
 }
